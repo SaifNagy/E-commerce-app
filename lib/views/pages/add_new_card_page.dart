@@ -35,21 +35,18 @@ class _AddNewCardPageState extends State<AddNewCardPage> {
                   prefixIcon: CupertinoIcons.creditcard,
                   hintText: 'Enter card number',
                 ),
-                const SizedBox(height: 20),
                 LabelWithTextField(
                   label: 'Card Holder Name',
                   controller: _cardHolderNameController,
                   prefixIcon: CupertinoIcons.person,
                   hintText: 'Enter card holder name',
                 ),
-                const SizedBox(height: 20),
                 LabelWithTextField(
                   label: 'Expiry Date',
                   controller: _expiryDateController,
                   prefixIcon: Icons.date_range,
                   hintText: 'Enter expiry date',
                 ),
-                const SizedBox(height: 20),
                 LabelWithTextField(
                   label: 'CVV',
                   controller: _cvvController,
@@ -57,25 +54,21 @@ class _AddNewCardPageState extends State<AddNewCardPage> {
                   hintText: 'Enter cvv',
                 ),
                 const Spacer(),
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Card added successfully!'),
-                          ),
-                        );
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: AppColors.white,
-                    ),
-                    child: const Text('Add Card'),
+                ElevatedButton(
+                  onPressed: () {
+                    if (_formKey.currentState!.validate()) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Card added successfully!'),
+                        ),
+                      );
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: AppColors.white,
                   ),
+                  child: const Text('Add Card'),
                 ),
               ],
             ),
