@@ -1,0 +1,46 @@
+name: ecommerce_app
+description: "A new Flutter project."
+
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.7.0
+
+dependencies:
+  cached_network_image: ^3.4.1
+  cloud_firestore: ^5.6.7
+  cupertino_icons: ^1.0.8
+  firebase_auth: ^5.5.3
+  firebase_core: ^3.13.0
+  flutter:
+    sdk: flutter
+  flutter_bloc: ^9.1.1
+  flutter_carousel_widget: ^3.1.0
+  flutter_dash: ^1.0.0
+  flutter_facebook_auth: ^7.1.2
+  flutter_native_splash: ^2.4.6
+  google_sign_in: ^6.3.0
+  lorem_ipsum: ^0.0.3
+  persistent_bottom_nav_bar_v2: ^5.3.1
+
+dev_dependencies:
+  flutter_lints: ^5.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/Syfer.jpg
+    - assets/images/mastercard.png
+
+flutter_native_splash:
+  color: "#673AB7"
+  #background_image: "assets/background.png"
+  image: assets/images/splash.png
+
+  android_12:
+    color: "#673AB7"
+    image: assets/images/splash.png
