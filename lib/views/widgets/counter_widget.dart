@@ -1,18 +1,37 @@
+import 'package:ecommerce_app/models/add_tocart_model.dart';
 import 'package:ecommerce_app/utils/app_colors.dart';
 import 'package:flutter/material.dart';
 
 class CounterWidget extends StatelessWidget {
-  final String productId;
+  final String? productId;
+  final AddToCartModel? cartItem;
   final int value;
   final dynamic cubit;
   final int? initialValue;
   const CounterWidget({
     super.key,
     required this.value,
-    required this.productId,
+    this.productId,
+    this.cartItem,
     required this.cubit,
-     this.initialValue
-  });
+    this.initialValue,
+  }) : assert(productId != null || cartItem != null);
+
+  Future<void> decrementCounter(dynamic param) async {
+    if (initialValue != null) {
+      await cubit.decrementcounter(param, initialValue);
+    } else {
+      await cubit.decrementcounter(param);
+    }
+  }
+
+  Future<void> incrementCounter(dynamic param) async {
+    if (initialValue != null) {
+      await cubit.incrementcounter(param, initialValue);
+    } else {
+      await cubit.incrementcounter(param);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,12 +47,20 @@ class CounterWidget extends StatelessWidget {
           child: Row(
             children: [
               IconButton(
-                onPressed: () => initialValue!=null? cubit.decrementcounter(productId,initialValue):cubit.decrementcounter(productId),
+                onPressed:
+                    () =>
+                        cartItem != null
+                            ? decrementCounter(cartItem)
+                            : decrementCounter(productId),
                 icon: const Icon(Icons.remove),
               ),
               Text(value.toString()),
               IconButton(
-                onPressed: () => initialValue!=null? cubit.incrementcounter(productId,initialValue): cubit.incrementcounter(productId,),
+                onPressed:
+                    () =>
+                        cartItem != null
+                            ? incrementCounter(cartItem)
+                            : incrementCounter(productId),
                 icon: const Icon(Icons.add),
               ),
             ],

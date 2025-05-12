@@ -1,5 +1,5 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
-class PaymentCardModel {
+
+  class PaymentCardModel {
   final String id;
   final String cardNumber;
   final String cardHolderName;
@@ -33,6 +33,29 @@ class PaymentCardModel {
       ischosen: ischosen ?? this.ischosen,
     );
   }
+
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      'id': id,
+      'cardNumber': cardNumber,
+      'cardHolderName': cardHolderName,
+      'expiryDate': expiryDate,
+      'cvv': cvv,
+      'ischosen': ischosen,
+    };
+  }
+
+  factory PaymentCardModel.fromMap(Map<String, dynamic> map) {
+    return PaymentCardModel(
+      id: map['id'] as String,
+      cardNumber: map['cardNumber'] as String,
+      cardHolderName: map['cardHolderName'] as String,
+      expiryDate: map['expiryDate'] as String,
+      cvv: map['cvv'] as String,
+      ischosen: map['ischosen'] as bool,
+    );
+  }
+
 }
 
 List<PaymentCardModel> dummypaymentcard = [

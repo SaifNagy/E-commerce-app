@@ -86,7 +86,7 @@ class _CustomBottomNavbarState extends State<CustomBottomNavbar> {
             ),
           ),
           PersistentTabConfig(
-            screen: const Profilepage(),
+            screen: const ProfilePage(),
             item: ItemConfig(
               icon: const Icon(CupertinoIcons.person),
               activeForegroundColor: AppColors.primary,

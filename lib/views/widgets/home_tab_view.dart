@@ -11,8 +11,13 @@ class HomeTabView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cubit=BlocProvider.of<HomeCubit>(context);
     return BlocBuilder<HomeCubit, HomeState>(
-      bloc: BlocProvider.of<HomeCubit>(context),
+      bloc: cubit,
+      buildWhen: (previous, current) => 
+          current is HomeLoading ||
+          current is HomeLoaded ||
+          current is HomeError,
       builder: (context, state) {
         if (state is HomeLoading) {
           return const Center(child: CircularProgressIndicator.adaptive());
@@ -46,7 +51,7 @@ class HomeTabView extends StatelessWidget {
                           ),
                         ),
                       ),
-                  options: FlutterCarouselOptions(
+                  options: CarouselOptions(
                     autoPlay: true,
                     height: 200.0,
                     showIndicator: true,

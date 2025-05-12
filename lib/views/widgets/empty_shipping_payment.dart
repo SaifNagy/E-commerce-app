@@ -1,5 +1,6 @@
 import 'package:ecommerce_app/utils/app_colors.dart';
 import 'package:ecommerce_app/utils/app_routes.dart';
+import 'package:ecommerce_app/view_models/add_new_card_cubit/payment_methods_cubit.dart';
 import 'package:ecommerce_app/view_models/checkout_cubit/checkout_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -16,12 +17,13 @@ class EmptyShippingAndPayment extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final checkoutcubit = BlocProvider.of<CheckoutCubit>(context);
+    final paymentMethodsCubit = BlocProvider.of<PaymentMethodsCubit>(context);
     return InkWell(
       onTap: () {
         if (isPayment == true) {
           Navigator.of(context)
-              .pushNamed(AppRoutes.addNewCardRoute)
-              .then((value) => checkoutcubit.getcartitems());
+              .pushNamed(AppRoutes.addNewCardRoute,arguments: paymentMethodsCubit)
+              .then((value)async => await checkoutcubit.getcartitems());
         } else {
           Navigator.of(context).pushNamed(AppRoutes.chooseLocation);
         }

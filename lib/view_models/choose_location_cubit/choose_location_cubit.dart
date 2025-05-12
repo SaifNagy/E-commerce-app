@@ -1,3 +1,5 @@
+import 'package:ecommerce_app/services/auth_services.dart';
+import 'package:ecommerce_app/services/location_services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ecommerce_app/models/location_item_model.dart';
 
@@ -7,6 +9,8 @@ class ChooseLocationCubit extends Cubit<ChooseLocationState> {
   ChooseLocationCubit() : super(ChooseLocationInitial());
 
   String selectedLocationId = dummyLocations.first.id;
+  final authServices = AuthServicesImpl();
+  final locationServices = LocationServicesImpl();
 
   void fetchLocations() {
     emit(FetchingLocations());
@@ -15,19 +19,23 @@ class ChooseLocationCubit extends Cubit<ChooseLocationState> {
     });
   }
 
-  void addLocation(String location) {
+  Future<void> addLocation(String location) async {
     emit(AddingLocations());
-    Future.delayed(const Duration(seconds: 1), () {
-      final splittedLocation = location.split('-');
+    try {
+      final splittedLocations = location.split('-');
       final locationItem = LocationItemModel(
         id: DateTime.now().toIso8601String(),
-        city: splittedLocation[0],
-        country: splittedLocation[1],
+        city: splittedLocations[0],
+        country: splittedLocations[1],
       );
-      dummyLocations.add(locationItem);
+      final currentUser = authServices.currentUser();
+      await locationServices.setLocation(locationItem, currentUser!.uid);
       emit(LocationAdded());
+      // final locations = await locationServices.fetchLocations(currentUser.uid);
       emit(FetchedLocations(dummyLocations));
-    });
+    } catch (e) {
+      emit(LocationAddingFailure(e.toString()));
+    }
   }
 
   void selectLocation(String locationId) {
@@ -45,22 +53,22 @@ class ChooseLocationCubit extends Cubit<ChooseLocationState> {
         (location) => location.id == selectedLocationId,
       );
       var previousLocation = dummyLocations.firstWhere(
-        (location) => location.ischosen == true,orElse: () => dummyLocations.first,
+        (location) => location.ischosen == true,
+        orElse: () => dummyLocations.first,
       );
-       previousLocation = previousLocation.copyWith(ischosen: false);
+      previousLocation = previousLocation.copyWith(ischosen: false);
       chosenAddress = chosenAddress.copyWith(ischosen: true);
-     
+
       final chosenIndex = dummyLocations.indexWhere(
         (location) => location.id == chosenAddress.id,
       );
       final previousIndex = dummyLocations.indexWhere(
         (location) => location.id == previousLocation.id,
       );
-       dummyLocations[previousIndex] = previousLocation;
+      dummyLocations[previousIndex] = previousLocation;
       dummyLocations[chosenIndex] = chosenAddress;
-     
 
-      emit(ConfirmAddressLoaded(  ));
+      emit(ConfirmAddressLoaded());
     });
   }
 }

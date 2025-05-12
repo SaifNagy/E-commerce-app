@@ -10,15 +10,13 @@ class AuthCubit extends Cubit<AuthState> {
   AuthCubit() : super(AuthInitial());
 
   final AuthServices authServices = AuthServicesImpl();
-  final _firestoreServices = FirestoreServices.instance;
+  final firestoreServices = FirestoreServices.instance;
 
   Future<void> loginWithEmailAndPassword(String email, String password) async {
     emit(AuthLoading());
     try {
-      final result = await authServices.loginWithEmailAndPassword(
-        email,
-        password,
-      );
+      final result =
+          await authServices.loginWithEmailAndPassword(email, password);
       if (result) {
         emit(const AuthDone());
       } else {
@@ -30,43 +28,38 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
   Future<void> registerWithEmailAndPassword(
-    String email,
-    String password,
-    String username,
-  ) async {
+      String email, String password, String username) async {
     emit(AuthLoading());
     try {
-      final result = await authServices.registerWithEmailAndPassword(
-        email,
-        password,
-      );
-      if (result)  {
-       await _saveUserData(email, username);
+      final result =
+          await authServices.registerWithEmailAndPassword(email, password);
+      if (result) {
+        await _saveUserData(email, username);
         emit(const AuthDone());
       } else {
-        emit(const AuthError('Registration failed'));
+        emit(const AuthError('Register failed'));
       }
     } catch (e) {
       emit(AuthError(e.toString()));
     }
   }
 
- Future <void> _saveUserData(String email,String username)
- async{
-     final currentUser = authServices.currentUser();
-        final userData = UserData(
-          id: currentUser!.uid,
-          email: email,
-          username: username,
-          createdAt: DateTime.now().toIso8601String(),
-        );
-        await _firestoreServices.setData(
-          path: ApisPaths.users(userData.id),
-          data: userData.toMap(),
-        );
+  Future<void> _saveUserData(String email, String username) async {
+    final currentUser = authServices.currentUser();
+    final userData = UserData(
+      id: currentUser!.uid,
+      username: username,
+      email: email,
+      createdAt: DateTime.now().toIso8601String(),
+    );
+
+    await firestoreServices.setData(
+      path: ApisPaths.users(userData.id),
+      data: userData.toMap(),
+    );
   }
 
-  void chechAuth() {
+  void checkAuth() {
     final user = authServices.currentUser();
     if (user != null) {
       emit(const AuthDone());
@@ -75,14 +68,12 @@ class AuthCubit extends Cubit<AuthState> {
 
   Future<void> logout() async {
     emit(const AuthLoggingout());
-    Future.delayed(const Duration(seconds: 1), () async {
-      try {
-        await authServices.logout();
-        emit(const AuthLoggedout());
-      } catch (e) {
-        emit(AuthLoggingoutError(e.toString()));
-      }
-    });
+    try {
+      await authServices.logout();
+      emit(const AuthLoggedout());
+    } catch (e) {
+      emit(AuthLoggingoutError(e.toString()));
+    }
   }
 
   Future<void> authenticateWithGoogle() async {

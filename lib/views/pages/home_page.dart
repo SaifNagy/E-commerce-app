@@ -1,4 +1,5 @@
 import 'package:ecommerce_app/utils/app_colors.dart';
+import 'package:ecommerce_app/view_models/categories_cubit/categories_cubit.dart';
 import 'package:ecommerce_app/view_models/home_cubit/home_cubit_cubit.dart';
 import 'package:ecommerce_app/views/widgets/category_tab_view.dart';
 import 'package:ecommerce_app/views/widgets/home_tab_view.dart';
@@ -29,29 +30,38 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         cubit.getHomeData();
         return cubit;
       },
-      child:  SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Column(
-              children: [
-               TabBar(
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Column(
+            children: [
+              TabBar(
+                controller: _tabcontroller,
+                unselectedLabelColor: AppColors.grey,
+                tabs: [const Tab(text: 'Home'), const Tab(text: 'Category')],
+              ),
+              Expanded(
+                child: TabBarView(
                   controller: _tabcontroller,
-                  unselectedLabelColor: AppColors.grey,
-                  tabs: [const Tab(text: 'Home'), const Tab(text: 'Category')],
+                  children: [
+                    const HomeTabView(),
+                    BlocProvider(
+                      create: (context) {
+                        final cubit = CategoriesCubit();
+                        cubit.getCategories();
+                        return cubit;
+                      },
+                      child: const CategoryTabView(),
+                    ),
+                  ],
                 ),
-                Expanded(
-                  child: TabBarView(
-                    controller: _tabcontroller,
-                    children: [const HomeTabView(), const CategoryTabView()],
-                  ),
-                ),
+              ),
 
-                const SizedBox(height: 24),
-              ],
-            ),
+              const SizedBox(height: 24),
+            ],
           ),
         ),
-      )
-    ;
+      ),
+    );
   }
 }

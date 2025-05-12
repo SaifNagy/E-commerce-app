@@ -40,9 +40,32 @@ class ProductDetailsPage extends StatelessWidget {
               forceMaterialTransparency: true,
               title: const Text('Product Details'),
               actions: [
-                IconButton(
-                  onPressed: () {},
-                  icon: const Icon(Icons.favorite_border),
+                BlocBuilder<ProductDetailsCubit, ProductDetailsState>(
+                  bloc: cubit,
+                  buildWhen:
+                      (previous, current) =>
+                          current is ProductAddedToFavourites ||
+                          current is ProductAddingToFavourites ||
+                          current is ProductAddToFavouritesError,
+                  builder: (context, state) {
+                    if (state is ProductAddingToCart) {
+                      return const IconButton(
+                        onPressed: null,
+                        icon: CircularProgressIndicator.adaptive(),
+                      );
+                    } else if (state is ProductAddedToFavourites) {
+                      return IconButton(
+                        onPressed: () {
+                          cubit.removeFavourite(product);
+                        },
+                        icon: const Icon(Icons.favorite),
+                      );
+                    }
+                    return IconButton(
+                      onPressed: () async => await cubit.setFavourite(product),
+                      icon: const Icon(Icons.favorite_border),
+                    );
+                  },
                 ),
               ],
             ),
@@ -138,7 +161,7 @@ class ProductDetailsPage extends StatelessWidget {
                                   } else if (state is ProductDetailsLoaded) {
                                     return CounterWidget(
                                       value: 1,
-                                      productId: productId,
+                                      productId: product.id,
                                       cubit:
                                           BlocProvider.of<ProductDetailsCubit>(
                                             context,

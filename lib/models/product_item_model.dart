@@ -1,5 +1,27 @@
+enum Productsize {
+  S,
+  M,
+  L,
+  xL,
+  xxL;
 
-enum Productsize { S, M, L, xL, xxL }
+  static Productsize fromString(String size) {
+    switch (size.toUpperCase()) {
+      case 'S':
+        return Productsize.S;
+      case 'M':
+        return Productsize.M;
+      case 'L':
+        return Productsize.L;
+      case 'XL':
+        return Productsize.xL;
+      case 'XXL':
+        return Productsize.xxL;
+      default:
+        return Productsize.S;
+    }
+  }
+}
 
 class ProductItemModel {
   final String id;
@@ -10,10 +32,8 @@ class ProductItemModel {
   final bool isfavourite;
   final String category;
   final double averageRate;
-  
 
   ProductItemModel({
-    
     required this.id,
     required this.name,
     required this.imgUrl,
@@ -46,17 +66,16 @@ class ProductItemModel {
       isfavourite: isfavourite ?? this.isfavourite,
       category: category ?? this.category,
       averageRate: averagerate ?? averageRate,
-     
     );
   }
 
- Map<String, dynamic> toMap() {
+  Map<String, dynamic> toMap() {
     final result = <String, dynamic>{};
 
     result.addAll({'id': id});
     result.addAll({'name': name});
     result.addAll({'imgUrl': imgUrl});
-    result.addAll({'description': discription});
+    result.addAll({'discription': discription});
     result.addAll({'price': price});
     result.addAll({'category': category});
     result.addAll({'averageRate': averageRate});
@@ -64,18 +83,17 @@ class ProductItemModel {
     return result;
   }
 
-  factory ProductItemModel.fromMap(
-      Map<String, dynamic> map,String documentId) {
+  factory ProductItemModel.fromMap(Map<String, dynamic> map) {
     return ProductItemModel(
-      id: documentId,
+      id: map['id'] ?? '',
       name: map['name'] ?? '',
       imgUrl: map['imgUrl'] ?? '',
-      discription: map['description'] ?? '',
+      discription: map['discription'] ?? '',
       price: map['price']?.toDouble() ?? 0.0,
       category: map['category'] ?? '',
       averageRate: map['averageRate']?.toDouble() ?? 0.0,
-    );}
-
+    );
+  }
 }
 
 List<ProductItemModel> dummyproducts = [

@@ -22,7 +22,8 @@ class CheckoutPage extends StatelessWidget {
     if (chosencard != null) {
       return PaymentMethodItem(
         paymentCard: chosencard,
-        onTap: () {
+        onTap: () async {
+          final checkOutCubit = BlocProvider.of<CheckoutCubit>(context);
           showModalBottomSheet(
             isScrollControlled: true,
             context: context,
@@ -40,9 +41,9 @@ class CheckoutPage extends StatelessWidget {
                 ),
               );
             },
-          ).then(
-            (value) => BlocProvider.of<CheckoutCubit>(context).getcartitems(),
-          );
+          ).then((value) async {
+            await checkOutCubit.getcartitems();
+          });
         },
       );
     } else {
@@ -97,12 +98,22 @@ class CheckoutPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) {
-        final cubit = CheckoutCubit();
-        cubit.getcartitems();
-        return cubit;
-      },
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) {
+            final cubit = CheckoutCubit();
+            cubit.getcartitems();
+            return cubit;
+          },
+        ),
+        BlocProvider(
+          create: (context) {
+            return PaymentMethodsCubit();
+          },
+        ),
+      ],
+
       child: Scaffold(
         appBar: AppBar(centerTitle: true, title: const Text('Checkout')),
         body: Builder(
@@ -141,7 +152,7 @@ class CheckoutPage extends StatelessWidget {
                               onTap: () {
                                 Navigator.of(context)
                                     .pushNamed(AppRoutes.chooseLocation)
-                                    .then((value) => cubit.getcartitems());
+                                    .then((value)async => await cubit.getcartitems());
                               },
                             ),
                             const SizedBox(height: 16),
@@ -283,7 +294,7 @@ class CheckoutPage extends StatelessWidget {
                           ],
                         ),
                       ),
-                    ),
+                    ),  
                   );
                 } else {
                   return const Center(child: Text('Something Went Wrong'));

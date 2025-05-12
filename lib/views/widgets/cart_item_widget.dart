@@ -7,12 +7,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class CartItemWidget extends StatelessWidget {
-  final AddTocartModel cartItem;
+  final AddToCartModel cartItem;
   const CartItemWidget({super.key, required this.cartItem});
 
   @override
   Widget build(BuildContext context) {
-    final cubit = BlocProvider.of<CartCubit>(context);
+    final cartCubit = BlocProvider.of<CartCubit>(context);
     return Padding(
       padding: const EdgeInsets.only(left: 16, right: 16, bottom: 8),
       child: Row(
@@ -33,9 +33,49 @@ class CartItemWidget extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  cartItem.product.name,
-                  style: Theme.of(context).textTheme.titleMedium,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      cartItem.product.name,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    BlocConsumer<CartCubit, CartState>(
+                      bloc: cartCubit,
+                      listenWhen:
+                          (previous, current) =>
+                              current is CartItemRemoved ||
+                              current is CartItemRemoving ||
+                              current is Carterror,
+                      listener: (context, state) {
+                        if (state is CartItemRemovedError) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(state.message)),
+                          );
+                        }
+                      },
+                      buildWhen:
+                          (previous, current) =>
+                              (current is CartItemRemoving &&
+                                  current.productId == cartItem.product.id) ||
+                              (current is CartItemRemoved &&
+                                  current.productId == cartItem.product.id) ||
+                              current is Carterror,
+                      builder: (context, state) {
+                        if (state is CartItemRemoving) {
+                          return const Center(
+                            child: CircularProgressIndicator.adaptive(),
+                          );
+                        }
+                        return IconButton(
+                          onPressed: () async {
+                            await cartCubit.removeCartItem(cartItem.id);
+                          },
+                          icon: const Icon(Icons.delete, color: AppColors.red),
+                        );
+                      },
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 4.0),
                 Text.rich(
@@ -54,7 +94,7 @@ class CartItemWidget extends StatelessWidget {
                 ),
                 const SizedBox(height: 12.0),
                 BlocBuilder<CartCubit, CartState>(
-                  bloc: cubit,
+                  bloc: cartCubit,
                   buildWhen:
                       (previous, current) =>
                           current is QuantityCounterLoaded &&
@@ -67,8 +107,8 @@ class CartItemWidget extends StatelessWidget {
                         children: [
                           CounterWidget(
                             value: state.value,
-                            productId: cartItem.product.id,
-                            cubit: cubit,
+                            cartItem: cartItem,     
+                             cubit: cartCubit,
                           ),
 
                           Text(
@@ -84,8 +124,8 @@ class CartItemWidget extends StatelessWidget {
                       children: [
                         CounterWidget(
                           value: cartItem.quantity,
-                          productId: cartItem.product.id,
-                          cubit: cubit,
+                            cartItem: cartItem,     
+                          cubit: cartCubit,
                           initialValue: cartItem.quantity,
                         ),
 

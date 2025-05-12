@@ -26,22 +26,21 @@ class PaymentMethodBottomSheet extends StatelessWidget {
               const SizedBox(height: 16),
               BlocBuilder(
                 bloc: BlocProvider.of<PaymentMethodsCubit>(context),
-                buildWhen:
-                    (previous, current) =>
-                        current is FetchedPaymentMethods ||
-                        current is FetchingPaymentMethodsError ||
-                        current is FetchingPaymentMethodsError,
+                buildWhen: (previous, current) =>
+                    current is FetchedPaymentMethods ||
+                    current is FetchingPaymentMethods ||
+                    current is FetchPaymentMethodsError,
                 builder: (_, state) {
                   if (state is FetchingPaymentMethods) {
                     return const Center(
                       child: CircularProgressIndicator.adaptive(),
                     );
                   } else if (state is FetchedPaymentMethods) {
-                    final paymentCards = state.paymentMethods;
+                    final paymentCards = state.paymentCards;
                     return ListView.builder(
                       physics: const NeverScrollableScrollPhysics(),
                       shrinkWrap: true,
-                      itemCount: state.paymentMethods.length,
+                      itemCount: state.paymentCards.length,
                       itemBuilder: (_, index) {
                         final paymentCard = paymentCards[index];
                         return Card(
@@ -68,14 +67,11 @@ class PaymentMethodBottomSheet extends StatelessWidget {
                             ),
                             title: Text(paymentCard.cardNumber),
                             subtitle: Text(paymentCard.cardHolderName),
-                            trailing: BlocBuilder<
-                              PaymentMethodsCubit,
-                              PaymentMethodsState
-                            >(
+                            trailing: BlocBuilder<PaymentMethodsCubit,
+                                PaymentMethodsState>(
                               bloc: paymentMethodsCubit,
-                              buildWhen:
-                                  (previous, current) =>
-                                      current is PaymentMethodChosen,
+                              buildWhen: (previous, current) =>
+                                  current is PaymentMethodChosen,
                               builder: (context, state) {
                                 if (state is PaymentMethodChosen) {
                                   final chosenPaymentMethod =
@@ -98,7 +94,7 @@ class PaymentMethodBottomSheet extends StatelessWidget {
                         );
                       },
                     );
-                  } else if (state is FetchingPaymentMethodsError) {
+                  } else if (state is FetchPaymentMethodsError) {
                     return Center(
                       child: Text(
                         state.errorMessage,
@@ -112,7 +108,11 @@ class PaymentMethodBottomSheet extends StatelessWidget {
               const SizedBox(height: 14),
               InkWell(
                 onTap: () {
-                  Navigator.of(context).pushNamed(AppRoutes.addNewCardRoute);
+                  Navigator.of(context)
+                      .pushNamed(AppRoutes.addNewCardRoute,
+                          arguments: paymentMethodsCubit)
+                      .then(
+                          (value) => paymentMethodsCubit.fetchPaymentMethods());
                 },
                 child: Card(
                   child: ListTile(
@@ -133,13 +133,12 @@ class PaymentMethodBottomSheet extends StatelessWidget {
               const SizedBox(height: 8),
               BlocConsumer<PaymentMethodsCubit, PaymentMethodsState>(
                 bloc: paymentMethodsCubit,
-                listenWhen:
-                    (previous, current) => current is ConfirmPaymentSuccess,
-                buildWhen:
-                    (previous, current) =>
-                        current is ConfirmPaymentLoading ||
-                        current is ConfirmPaymentSuccess ||
-                        current is ConfirmPaymentFailure,
+                listenWhen: (previous, current) =>
+                    current is ConfirmPaymentSuccess,
+                buildWhen: (previous, current) =>
+                    current is ConfirmPaymentLoading ||
+                    current is ConfirmPaymentSuccess ||
+                    current is ConfirmPaymentFailure,
                 listener: (context, state) {
                   if (state is ConfirmPaymentSuccess) {
                     Navigator.of(context).pop();
@@ -155,8 +154,8 @@ class PaymentMethodBottomSheet extends StatelessWidget {
 
                   return MainButton(
                     name: 'Confirm Payment',
-                    onTap: () {
-                      paymentMethodsCubit.confirmPaymentMethod();
+                    onTap: ()  async{await 
+                       paymentMethodsCubit.confirmPaymentMethod();
                     },
                   );
                 },

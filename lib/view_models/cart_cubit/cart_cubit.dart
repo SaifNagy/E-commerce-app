@@ -1,4 +1,7 @@
 import 'package:ecommerce_app/models/add_tocart_model.dart';
+import 'package:ecommerce_app/services/auth_services.dart';
+import 'package:ecommerce_app/services/cart_services.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 part 'cart_state.dart';
@@ -7,36 +10,90 @@ class CartCubit extends Cubit<CartState> {
   CartCubit() : super(CartInitial());
   int quantity = 1;
 
-  void getcartitems() async {
+  final CartServices _cartServices = CartServicesImpl();
+  final AuthServices _authServices = AuthServicesImpl();
+
+  Future<void> getcartitems() async {
     emit(CartLoading());
-    emit(CartLoaded(dummyCart, _subtotal));
+    try {
+      final currentUser = _authServices.currentUser();
+            debugPrint(currentUser!.uid.toString());
+
+      final cartItems = await _cartServices.fetchCartItems(currentUser.uid);
+
+      emit(CartLoaded(cartItems, _subtotal(cartItems)));
+    } catch (e) {
+      emit(Carterror(e.toString()));
+    }
   }
 
-  void incrementcounter(String productId, [int? initialValue]) {
+  Future<void> incrementcounter(
+    AddToCartModel carItem, [
+    int? initialValue,
+  ]) async {
     if (initialValue != null) {
       quantity = initialValue;
     }
     quantity++;
-    final index = dummyCart.indexWhere((item) => item.product.id == productId);
-    dummyCart[index] = dummyCart[index].copyWith(quantity: quantity);
+    final updatedCartItem = carItem.copyWith(quantity: quantity);
+    final currentUser = _authServices.currentUser();
+    await _cartServices.setCartItem(currentUser!.uid, updatedCartItem);
 
-    emit(QuantityCounterLoaded(value: quantity, productid: productId));
-    emit(SubtotalUpdated(_subtotal));
+    emit(
+      QuantityCounterLoaded(
+        value: quantity,
+        productid: updatedCartItem.product.id,
+      ),
+    );
+    final cartItems = await _cartServices.fetchCartItems(currentUser.uid);
+
+    emit(SubtotalUpdated(_subtotal(cartItems)));
   }
 
-  void decrementcounter(String productId, [int? initialValue]) {
+  Future<void> decrementcounter(
+    AddToCartModel cartItem, [
+    int? initialValue,
+  ]) async {
     if (initialValue != null) {
       quantity = initialValue;
     }
     quantity--;
-    final index = dummyCart.indexWhere((item) => item.product.id == productId);
-    dummyCart[index] = dummyCart[index].copyWith(quantity: quantity);
-    emit(QuantityCounterLoaded(value: quantity, productid: productId));
-    emit(SubtotalUpdated(_subtotal));
+    final updatedCartItem = cartItem.copyWith(quantity: quantity);
+    final currentUser = _authServices.currentUser();
+    await _cartServices.setCartItem(currentUser!.uid, updatedCartItem);
+
+    emit(
+      QuantityCounterLoaded(
+        value: quantity,
+        productid: updatedCartItem.product.id,
+      ),
+    );
+    final cartItems = await _cartServices.fetchCartItems(currentUser.uid);
+
+    emit(SubtotalUpdated(_subtotal(cartItems)));
+  }
+
+  Future<void> removeCartItem(String productId) async {
+    emit(CartItemRemoving(productId));
+    try {
+      final currentUser = _authServices.currentUser();
+      await _cartServices.removeCartItem(currentUser!.uid, productId);
+      emit(CartItemRemoved(productId));
+      final cartItems = await _cartServices.fetchCartItems(currentUser.uid);
+      final subtotal = cartItems.fold<double>(
+        0,
+        (previousValue, item) =>
+            previousValue + item.product.price * item.quantity,
+      );
+      emit(CartLoaded(cartItems, subtotal));
+    } catch (e) {
+      emit(CartItemRemovedError(e.toString()));
+    }
   }
 }
 
-double get _subtotal => dummyCart.fold<double>(
-  0,
-  (previousValue, item) => previousValue + item.product.price * item.quantity,
-);
+double _subtotal(List<AddToCartModel> cartItems) => cartItems.fold<double>(
+      0,
+      (previousValue, item) =>
+          previousValue + item.product.price * item.quantity,
+    );

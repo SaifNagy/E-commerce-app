@@ -7,7 +7,7 @@ final class CheckoutInitial extends CheckoutState {}
 final class CheckoutLoading extends CheckoutState {}
 
 final class CheckoutLoaded extends CheckoutState {
-  final List<AddTocartModel> caritems;
+  final List<AddToCartModel> caritems;
   final double total;
   final int numOfProducts;
   PaymentCardModel? chosenPaymentCard;
@@ -25,5 +25,5 @@ final class CheckoutLoaded extends CheckoutState {
 final class CheckoutError extends CheckoutState {
   final String message;
 
-  CheckoutError({required this.message});
+  CheckoutError( this.message);
 }

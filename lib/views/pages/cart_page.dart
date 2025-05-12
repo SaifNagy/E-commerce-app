@@ -19,13 +19,15 @@ class CartPage extends StatelessWidget {
       },
       child: Builder(
         builder: (context) {
+      final cubit = BlocProvider.of<CartCubit>(context);
+
           return BlocBuilder<CartCubit, CartState>(
             buildWhen:
                 (previous, current) =>
                     current is CartLoading ||
                     current is CartLoaded ||
                     current is Carterror,
-            bloc: BlocProvider.of<CartCubit>(context),
+            bloc: cubit,
             builder: (context, state) {
               if (state is CartLoading) {
                 return const Center(
@@ -110,7 +112,7 @@ class CartPage extends StatelessWidget {
                           );
                         },
                       ),
-
+                
                       Padding(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 25,

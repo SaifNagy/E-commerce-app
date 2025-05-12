@@ -8,13 +8,14 @@ final class CartInitial extends CartState {}
 final class CartLoading extends CartState {}
 final class CartLoaded extends CartState {
   final double subtotal;
-  final List<AddTocartModel> cartItems;
+  final List<AddToCartModel> cartItems;
 const CartLoaded(this.cartItems,this.subtotal);
 }
 final class Carterror extends CartState {
   final String message;
 
 const  Carterror(this.message);
+
 }
 
 final class QuantityCounterLoaded extends CartState {
@@ -26,4 +27,18 @@ final class QuantityCounterLoaded extends CartState {
 final class SubtotalUpdated extends CartState {
   final double subtotal;
   const SubtotalUpdated(this.subtotal);
+}
+
+final class CartItemRemoved extends CartState {
+  final String productId;
+  const CartItemRemoved(this.productId);
+}
+
+final class CartItemRemovedError extends CartState {
+  final String message;
+  const CartItemRemovedError(this.message);
+}
+final class CartItemRemoving extends CartState {
+  final String productId;
+  const CartItemRemoving(this.productId);
 }

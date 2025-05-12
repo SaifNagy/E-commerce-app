@@ -1,4 +1,6 @@
 import 'package:ecommerce_app/models/add_tocart_model.dart';
+import 'package:ecommerce_app/services/auth_services.dart';
+import 'package:ecommerce_app/services/product_details_services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ecommerce_app/models/product_item_model.dart';
 
@@ -6,27 +8,25 @@ part 'product_details_state.dart';
 
 class ProductDetailsCubit extends Cubit<ProductDetailsState> {
   ProductDetailsCubit() : super(ProductDetailsInitial());
-   Productsize? selectedsize;
-   int quantity=1;
 
-  void getproductdetails(String id) {
+  Productsize? selectedsize;
+  int quantity = 1;
+
+  final ProductDetailsServices productDetailsServices =
+      ProductDetailsServicesImpl();
+  final AuthServices authServices = AuthServicesImpl();
+
+  void getproductdetails(String id) async {
     emit(ProductDetailsLoading());
-    Future.delayed(const Duration(seconds: 2), () {
-      final selectedProduct = dummyproducts.firstWhere(
-        (element) => element.id == id,
+    try {
+      final selectedProduct = await productDetailsServices.fetchProductDetails(
+        id,
       );
+      
       emit(ProductDetailsLoaded(product: selectedProduct));
-    });
-  }
-
-  void incrementcounter(String productId) {
-    quantity++;
-    emit(QuantityCounterLoaded(value:quantity));
-  }
-
-  void decrementcounter(String productId) {
-  quantity--;
-    emit(QuantityCounterLoaded(value:quantity));
+    } catch (e) {
+      emit(ProductDetailsError(e.toString()));
+    }
   }
 
   void selectSize(Productsize size) {
@@ -34,22 +34,57 @@ class ProductDetailsCubit extends Cubit<ProductDetailsState> {
     emit(SizeSelected(size: size));
   }
 
-  void addToCart(String productId) {
+  Future<void> addToCart(String productId) async {
     emit(ProductAddingToCart());
-    final caritem = AddTocartModel(
-      id: DateTime.now().toIso8601String(),
-      product: dummyproducts.firstWhere((item) => item.id == productId),
-      size: selectedsize!,
-      quantity: quantity,
-    );
-dummyCart.add(caritem);
-    Future.delayed(const Duration(seconds: 1), () {
-      emit(
-        ProductAddedToCart(
-          productId: productId,
-        ),
+    try {
+     final currentUser = authServices.currentUser();
+      final selectedProduct = await productDetailsServices.fetchProductDetails(
+        productId,
       );
-    });
-    //add to cart logic
+      final caritem = AddToCartModel(
+        id: DateTime.now().toIso8601String(),
+        product: selectedProduct,
+        size: selectedsize!,
+        quantity: quantity,
+      );
+      await productDetailsServices.addToCard(caritem, currentUser!.uid);
+
+      emit(ProductAddedToCart(productId: productId));
+    } catch (e) {
+      emit(ProductAddToCartError(e.toString()));
+    }
   }
+
+  void incrementcounter(String productId) {
+    quantity++;
+    emit(QuantityCounterLoaded(value: quantity));
+  }
+
+  void decrementcounter(String productId) {
+    quantity--;
+    emit(QuantityCounterLoaded(value: quantity));
+  }
+
+Future <void> setFavourite(ProductItemModel product) async {
+    emit(ProductAddingToFavourites());
+    try {
+      final currentUser = authServices.currentUser();
+      await productDetailsServices.setFavorite(product, currentUser!.uid);
+      emit(ProductAddedToFavourites());
+    } catch (e) {
+      emit(ProductAddToFavouritesError(e.toString()));
+    }
+  }
+
+  Future <void> removeFavourite(ProductItemModel product) async {
+    emit(ProductAddingToFavourites());
+    try {
+      final currentUser = authServices.currentUser();
+      await productDetailsServices.removeFavourite(product, currentUser!.uid);
+      emit(ProductAddedToFavourites());
+    } catch (e) {
+      emit(ProductAddToFavouritesError(e.toString()));
+    }
+  }
+
 }

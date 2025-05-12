@@ -1,3 +1,4 @@
+
 class LocationItemModel {
   final String id;
   final String city;
@@ -31,26 +32,25 @@ class LocationItemModel {
   }
 
   Map<String, dynamic> toMap() {
-    final result = <String, dynamic>{};
-
-    result.addAll({'id': id});
-    result.addAll({'city': city});
-    result.addAll({'country': country});
-    result.addAll({'imgUrl': imgUrl});
-    result.addAll({'isChosen': ischosen});
-
-    return result;
+    return <String, dynamic>{
+      'id': id,
+      'city': city,
+      'country': country,
+      'imgUrl': imgUrl,
+      'ischosen': ischosen,
+    };
   }
 
   factory LocationItemModel.fromMap(Map<String, dynamic> map) {
     return LocationItemModel(
-      id: map['id'] ?? '',
-      city: map['city'] ?? '',
-      country: map['country'] ?? '',
-      imgUrl: map['imgUrl'] ?? '',
-      ischosen: map['isChosen'] ?? false,
+      id: map['id'] as String,
+      city: map['city'] as String,
+      country: map['country'] as String,
+      imgUrl: map['imgUrl'] as String,
+      ischosen: map['ischosen'] as bool,
     );
   }
+
 }
 
 List<LocationItemModel> dummyLocations = [

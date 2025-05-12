@@ -12,7 +12,7 @@ final class ProductDetailsLoaded extends ProductDetailsState {
 }
 
 final class ProductDetailsError extends ProductDetailsState {
-  ProductDetailsError({required this.message});
+  ProductDetailsError( this.message);
   final String message;
 }
 
@@ -33,4 +33,19 @@ final class ProductAddedToCart extends ProductDetailsState {
 }
 final class ProductAddingToCart extends ProductDetailsState {
 
+}
+final class ProductAddToCartError extends ProductDetailsState {
+  final String message;
+  ProductAddToCartError(this.message);
+}
+
+final class ProductAddedToFavourites extends ProductDetailsState {
+  ProductAddedToFavourites();
+}
+final class ProductAddingToFavourites extends ProductDetailsState {
+
+}
+final class ProductAddToFavouritesError extends ProductDetailsState {
+  final String message;
+  ProductAddToFavouritesError(this.message);
 }

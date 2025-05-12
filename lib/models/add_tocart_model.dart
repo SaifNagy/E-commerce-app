@@ -1,35 +1,54 @@
+
 import 'package:ecommerce_app/models/product_item_model.dart';
 
-class AddTocartModel {
+class AddToCartModel {
   final String id;
   final ProductItemModel product;
   final Productsize size;
   final int quantity;
 
-  AddTocartModel({
-    required this.product,
+  const AddToCartModel({
     required this.id,
+    required this.product,
     required this.size,
     required this.quantity,
   });
 
   double get totalPrice => product.price * quantity;
 
-
-
-  AddTocartModel copyWith({
+  AddToCartModel copyWith({
     String? id,
     ProductItemModel? product,
     Productsize? size,
     int? quantity,
   }) {
-    return AddTocartModel(
+    return AddToCartModel(
       id: id ?? this.id,
       product: product ?? this.product,
       size: size ?? this.size,
       quantity: quantity ?? this.quantity,
     );
   }
+
+  Map<String, dynamic> toMap() {
+    final result = <String, dynamic>{};
+  
+    result.addAll({'id': id});
+    result.addAll({'product': product.toMap()});
+    result.addAll({'size': size.name});
+    result.addAll({'quantity': quantity});
+  
+    return result;
+  }
+
+  factory AddToCartModel.fromMap(Map<String, dynamic> map) {
+    return AddToCartModel(
+      id: map['id'] ?? '',
+      product: ProductItemModel.fromMap(map['product']),
+      size: Productsize.fromString(map['size']),
+      quantity: map['quantity']?.toInt() ?? 0,
+    );
+  }
 }
 
-List<AddTocartModel> dummyCart = [];
+List<AddToCartModel> dummyCart = [];
