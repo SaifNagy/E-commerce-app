@@ -22,8 +22,9 @@ class EmptyShippingAndPayment extends StatelessWidget {
       onTap: () {
         if (isPayment == true) {
           Navigator.of(context)
-              .pushNamed(AppRoutes.addNewCardRoute,arguments: paymentMethodsCubit)
-              .then((value)async => await checkoutcubit.getcartitems());
+              .pushNamed(AppRoutes.addNewCardRoute,
+                  arguments: paymentMethodsCubit)
+              .then((value) async => await checkoutcubit.getCheckoutContent());
         } else {
           Navigator.of(context).pushNamed(AppRoutes.chooseLocation);
         }

@@ -7,7 +7,7 @@ abstract class LocationServices {
   Future<List<LocationItemModel>> fetchLocations(String userId,
       [bool chosen = false]);
   Future<void> setLocation(LocationItemModel location, String userId);
-  Future<LocationItemModel> fetchLocation(String userId, String locationId);
+  Future<LocationItemModel> fetchSingleLocation(String userId, String locationId);
 }
 
 class LocationServicesImpl implements LocationServices {
@@ -27,11 +27,11 @@ class LocationServicesImpl implements LocationServices {
         path: ApisPaths.locations(userId),
         builder: (data, documentId) => LocationItemModel.fromMap(data),
         queryBuilder:
-            chosen ? (query) => query.where('isChosen', isEqualTo: true) : null,
+            chosen ? (query) => query.where('ischosen', isEqualTo: true) : null,
       );
 
   @override
-  Future<LocationItemModel> fetchLocation(
+  Future<LocationItemModel> fetchSingleLocation(
           String userId, String locationId) async =>
       await firestoreServices.getDocument(
         path: ApisPaths.location(userId, locationId),

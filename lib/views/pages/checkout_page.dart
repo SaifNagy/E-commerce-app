@@ -7,6 +7,7 @@ import 'package:ecommerce_app/view_models/add_new_card_cubit/payment_methods_cub
 import 'package:ecommerce_app/view_models/checkout_cubit/checkout_cubit.dart';
 import 'package:ecommerce_app/views/widgets/checkout_headlines_item.dart';
 import 'package:ecommerce_app/views/widgets/empty_shipping_payment.dart';
+import 'package:ecommerce_app/views/widgets/label_with_value_row.dart';
 import 'package:ecommerce_app/views/widgets/payment_method_bottom_sheet.dart';
 import 'package:ecommerce_app/views/widgets/payment_method_item.dart';
 import 'package:flutter/material.dart';
@@ -42,7 +43,7 @@ class CheckoutPage extends StatelessWidget {
               );
             },
           ).then((value) async {
-            await checkOutCubit.getcartitems();
+            await checkOutCubit.getCheckoutContent();
           });
         },
       );
@@ -77,7 +78,6 @@ class CheckoutPage extends StatelessWidget {
                 chosenAddress.city,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
-
               Text(
                 '${chosenAddress.city}, ${chosenAddress.country}',
                 style: Theme.of(
@@ -103,7 +103,7 @@ class CheckoutPage extends StatelessWidget {
         BlocProvider(
           create: (context) {
             final cubit = CheckoutCubit();
-            cubit.getcartitems();
+            cubit.getCheckoutContent();
             return cubit;
           },
         ),
@@ -113,7 +113,6 @@ class CheckoutPage extends StatelessWidget {
           },
         ),
       ],
-
       child: Scaffold(
         appBar: AppBar(centerTitle: true, title: const Text('Checkout')),
         body: Builder(
@@ -121,12 +120,10 @@ class CheckoutPage extends StatelessWidget {
             final cubit = BlocProvider.of<CheckoutCubit>(context);
             return BlocBuilder<CheckoutCubit, CheckoutState>(
               bloc: cubit,
-              buildWhen:
-                  (previous, current) =>
-                      current is CheckoutLoading ||
-                      current is CheckoutLoaded ||
-                      current is CheckoutError,
-
+              buildWhen: (previous, current) =>
+                  current is CheckoutLoading ||
+                  current is CheckoutLoaded ||
+                  current is CheckoutError,
               builder: (context, state) {
                 if (state is CheckoutLoading) {
                   return const Center(
@@ -152,15 +149,15 @@ class CheckoutPage extends StatelessWidget {
                               onTap: () {
                                 Navigator.of(context)
                                     .pushNamed(AppRoutes.chooseLocation)
-                                    .then((value)async => await cubit.getcartitems());
+                                    .then((value) async =>
+                                        await cubit.getCheckoutContent());
                               },
                             ),
                             const SizedBox(height: 16),
                             __buildShippingItem(chosenAddress, context),
                             const SizedBox(height: 30),
                             CheckoutHeadlinesItem(
-                              title: 'Products',
-                              numOfProducts: state.numOfProducts,
+                              title: 'Products (${state.numOfProducts})',
                             ),
                             const SizedBox(height: 16),
                             ListView.separated(
@@ -193,10 +190,9 @@ class CheckoutPage extends StatelessWidget {
                                         children: [
                                           Text(
                                             cartitem.product.name,
-                                            style:
-                                                Theme.of(
-                                                  context,
-                                                ).textTheme.titleMedium,
+                                            style: Theme.of(
+                                              context,
+                                            ).textTheme.titleMedium,
                                           ),
                                           const SizedBox(height: 4.0),
                                           Row(
@@ -215,10 +211,9 @@ class CheckoutPage extends StatelessWidget {
                                                   children: [
                                                     TextSpan(
                                                       text: cartitem.size.name,
-                                                      style:
-                                                          Theme.of(context)
-                                                              .textTheme
-                                                              .titleMedium,
+                                                      style: Theme.of(context)
+                                                          .textTheme
+                                                          .titleMedium,
                                                     ),
                                                   ],
                                                 ),
@@ -234,6 +229,26 @@ class CheckoutPage extends StatelessWidget {
                                                     ),
                                               ),
                                             ],
+                                          ),
+                                          Text.rich(
+                                            TextSpan(
+                                              text: 'Quantity: ',
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .titleMedium!
+                                                  .copyWith(
+                                                    color: AppColors.grey,
+                                                  ),
+                                              children: [
+                                                TextSpan(
+                                                  text: cartitem.quantity
+                                                      .toString(),
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .titleMedium,
+                                                ),
+                                              ],
+                                            ),
                                           ),
                                         ],
                                       ),
@@ -251,24 +266,24 @@ class CheckoutPage extends StatelessWidget {
                             const SizedBox(height: 16),
                             Divider(color: AppColors.grey2),
                             const SizedBox(height: 16),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  'Total Amount',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleMedium!
-                                      .copyWith(color: AppColors.grey),
-                                ),
-                                Text(
-                                  '\$ ${state.total.toStringAsFixed(1)}',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleMedium!
-                                      .copyWith(color: AppColors.grey),
-                                ),
-                              ],
+                            LabelWithValueRow(
+                              label: 'Subtotal',
+                              value: '\$ ${state.subTotal.toStringAsFixed(1)}',
+                            ),
+                            const SizedBox(
+                              height: 12,
+                            ),
+                            LabelWithValueRow(
+                              label: 'Shipping ',
+                              value:
+                                  '\$ ${state.shippingValue.toStringAsFixed(1)}',
+                            ),
+                            const SizedBox(
+                              height: 12,
+                            ),
+                            LabelWithValueRow(
+                              label: 'Total Amount',
+                              value: '\$ ${state.total.toStringAsFixed(1)}',
                             ),
                             const SizedBox(height: 40),
                             SizedBox(
@@ -285,16 +300,16 @@ class CheckoutPage extends StatelessWidget {
                                   style: Theme.of(
                                     context,
                                   ).textTheme.titleMedium!.copyWith(
-                                    color: AppColors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                        color: AppColors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                 ),
                               ),
                             ),
                           ],
                         ),
                       ),
-                    ),  
+                    ),
                   );
                 } else {
                   return const Center(child: Text('Something Went Wrong'));

@@ -4,6 +4,7 @@ import 'package:ecommerce_app/models/payment_card_model.dart';
 import 'package:ecommerce_app/services/auth_services.dart';
 import 'package:ecommerce_app/services/cart_services.dart';
 import 'package:ecommerce_app/services/checkout_services.dart';
+import 'package:ecommerce_app/services/location_services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 part 'checkout_state.dart';
@@ -13,13 +14,14 @@ class CheckoutCubit extends Cubit<CheckoutState> {
   final checkoutServices = CheckoutServicesImpl();
   final authServices = AuthServicesImpl();
   final cartServices = CartServicesImpl();
+  final locationServices = LocationServicesImpl();
 
-
-  Future<void> getcartitems() async {
+  Future<void> getCheckoutContent() async {
     emit(CheckoutLoading());
     try {
       final currentUser = authServices.currentUser();
       final cartItems = await cartServices.fetchCartItems(currentUser!.uid);
+      double shippingValue = 10;
       final subtotal = cartItems.fold(
         0.0,
         (previousValue, element) =>
@@ -32,15 +34,15 @@ class CheckoutCubit extends Cubit<CheckoutState> {
       final chosenPaymentCard =
           (await checkoutServices.fetchPaymentMethods(currentUser.uid, true))
               .first;
-      final chosenAddress = dummyLocations.firstWhere(
-        (element) => element.ischosen == true,
-        orElse: () => dummyLocations.first,
-      );
+      final chosenAddress =
+          (await locationServices.fetchLocations(currentUser.uid, true)).first;
 
       emit(
         CheckoutLoaded(
           caritems: cartItems,
-          total: subtotal + 10,
+          total: subtotal + shippingValue,
+          subTotal: subtotal,
+          shippingValue: shippingValue,
           numOfProducts: numOfProducts,
           chosenPaymentCard: chosenPaymentCard,
           chosenAddress: chosenAddress,
@@ -49,6 +51,5 @@ class CheckoutCubit extends Cubit<CheckoutState> {
     } catch (e) {
       emit(CheckoutError(e.toString()));
     }
-    
   }
 }
